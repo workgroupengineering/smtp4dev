@@ -39,7 +39,15 @@ namespace Rnwood.Smtp4dev
             }
             else
             {
-                host.Run();
+                try
+                {
+                    host.Run();
+                } catch (Exception e)
+                {
+                    Console.Error.WriteLine();
+                    Console.Error.WriteLine(e.ToString());
+                    Environment.Exit(1);
+                }
             }
         }
 

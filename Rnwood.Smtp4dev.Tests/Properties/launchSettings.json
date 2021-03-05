@@ -19,6 +19,7 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
+        "SMTP4DEV_E2E_CHROMEEXE": "C:\\Users\\Rob\\Downloads\\Chrome-bin\\chrome.exe",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:51693/"

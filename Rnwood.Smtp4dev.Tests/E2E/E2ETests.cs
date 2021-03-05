@@ -207,6 +207,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
 
                     ChromeOptions chromeOptions = new ChromeOptions();
+
+                    string chromeExe = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_CHROMEEXE");
+                    if (!string.IsNullOrEmpty(chromeExe))
+                    {
+                        chromeOptions.BinaryLocation = chromeExe;
+                    }
+
+
                     if (!Debugger.IsAttached)
                     {
                         chromeOptions.AddArgument("--headless");

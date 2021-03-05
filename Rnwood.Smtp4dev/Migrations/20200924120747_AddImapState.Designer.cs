@@ -9,7 +9,7 @@ using Rnwood.Smtp4dev.DbModel;
 namespace Rnwood.Smtp4dev.Migrations
 {
     [DbContext(typeof(Smtp4devDbContext))]
-    [Migration("20200924120747_AddImapState")]
+    //[Migration("20200924120747_AddImapState")]
     partial class AddImapState
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
