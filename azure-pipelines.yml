@@ -139,15 +139,14 @@ stages:
       artifact: linux-arm     
   - job: DockerBuildLinux
     displayName: DockerBuild - Linux
-    pool:
-      vmImage: 'ubuntu-18.04'
+    pool: Default
     steps:
     - task: Docker@2
       displayName: Build image
       inputs:
         command: build
         dockerfile: '**/Dockerfile.linux'
-        arguments: '--build-arg version=$(tag) -t $(docker_repo):linux-amd64-$(tag)'
+        arguments: '--platform linux --build-arg version=$(tag) -t $(docker_repo):linux-amd64-$(tag)'
     - task: Docker@2
       displayName: Push image
       condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
@@ -159,8 +158,7 @@ stages:
           linux-amd64-$(tag)       
   - job: DockerBuildWindows
     displayName: DockerBuild - Windows
-    pool:
-      vmImage: 'windows-2019'
+    pool: Default
     steps:
     - task: Docker@2
       displayName: Build image
@@ -185,8 +183,7 @@ stages:
     - DockerBuildWindows
     variables:
       DOCKER_CLI_EXPERIMENTAL: enabled
-    pool:
-      vmImage: 'windows-2019'
+    pool: Default
     steps:
     - task: Docker@2
       displayName: Login.
@@ -292,8 +289,7 @@ stages:
     displayName: Docker Release Tag - Linux
     variables:
       DOCKER_CLI_EXPERIMENTAL: enabled
-    pool:
-      vmImage: 'ubuntu-18.04'
+    pool: Default
     steps:
     - checkout: none
     - task: Docker@2
@@ -318,8 +314,7 @@ stages:
     dependsOn: DockerReleaseTagLinux
     variables:
       DOCKER_CLI_EXPERIMENTAL: enabled
-    pool:
-      vmImage: 'windows-2019'
+    pool: Default
     steps:
     - checkout: none
     - task: Docker@2
