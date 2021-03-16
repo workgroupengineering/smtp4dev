@@ -143,9 +143,6 @@ stages:
     steps:
     - task: DockerInstaller@0
       displayName: Docker Installer
-      inputs:
-        dockerVersion: 19.03.15-ce
-        releaseType: stable
     - task: Docker@2
       displayName: Build image
       inputs:
@@ -165,6 +162,8 @@ stages:
     displayName: DockerBuild - Windows
     pool: Default
     steps:
+    - task: DockerInstaller@0
+      displayName: Docker Installer
     - task: Docker@2
       displayName: Build image
       inputs:
@@ -297,6 +296,8 @@ stages:
     pool: Default
     steps:
     - checkout: none
+    - task: DockerInstaller@0
+      displayName: Docker Installer    
     - task: Docker@2
       displayName: Login.
       inputs:
@@ -322,6 +323,8 @@ stages:
     pool: Default
     steps:
     - checkout: none
+    - task: DockerInstaller@0
+      displayName: Docker Installer
     - task: Docker@2
       displayName: Login.
       inputs:
