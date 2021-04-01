@@ -4,6 +4,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using CommandLiners;
 using CommandLiners.Options;
 using Microsoft.AspNetCore;
@@ -90,6 +91,11 @@ namespace Rnwood.Smtp4dev
             CommandLineOptions cmdLineOptions = new CommandLineOptions();
             new ConfigurationBuilder().AddCommandLineOptions(commandLineOptions).Build().Bind(cmdLineOptions);
 
+            if (cmdLineOptions.ParentProcessId.HasValue)
+            {
+                SetupExitWhenParentDies(cmdLineOptions);
+            }
+
 
             Directory.SetCurrentDirectory(dataDir);
 
@@ -120,7 +126,24 @@ namespace Rnwood.Smtp4dev
                         hostingContext.HostingEnvironment.EnvironmentName = config["Environment"];
                     })
                 .UseStartup<Startup>()
+                .UseShutdownTimeout(TimeSpan.FromSeconds(10))
                 .Build();
+        }
+
+        private static void SetupExitWhenParentDies(CommandLineOptions cmdLineOptions)
+        {
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                    if (Process.GetProcessById(cmdLineOptions.ParentProcessId.Value) == null)
+                    {
+                        Environment.Exit(0);
+                        break;
+                    }
+                }
+            }).Start();
         }
 
         private static MapOptions<CommandLineOptions> TryParseCommandLine(string[] args)
@@ -151,7 +174,8 @@ namespace Rnwood.Smtp4dev
                 { "relaypassword=", "The password for the SMTP server used to relay messages", data => map.Add(data, x=> x.RelayOptions.Password) },
                 { "imapport=", "Specifies the port the IMAP server will listen on - allows standard email clients to view/retrieve messages", data => map.Add(data, x=> x.ServerOptions.ImapPort) },
                 { "nousersettings", "Skip loading of appsetttings.json file in %APPDATA%", data => map.Add((data !=null).ToString(), x=> x.NoUserSettings) },
-                { "recreatedb", "Recreates the DB on startup if it already exists", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.RecreateDb) }
+                { "recreatedb", "Recreates the DB on startup if it already exists", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.RecreateDb) },
+                { "parentprocessid=", "Parent process ID. Server will exit when this process exits", data => map.Add(data, x => x.ParentProcessId)  }
             };
 
             try
@@ -172,10 +196,13 @@ namespace Rnwood.Smtp4dev
 
             if (help)
             {
-                Console.Error.WriteLine();
-                Console.Error.WriteLine(" > For information about default values see documentation in appsettings.json.");
-                Console.Error.WriteLine();
-                options.WriteOptionDescriptions(Console.Error);
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SMTP4DEV_NOHELP")))
+                {
+                    Console.Error.WriteLine();
+                    Console.Error.WriteLine(" > For information about default values see documentation in appsettings.json.");
+                    Console.Error.WriteLine();
+                    options.WriteOptionDescriptions(Console.Error);
+                }
                 return null;
             }
             else
@@ -195,6 +222,8 @@ namespace Rnwood.Smtp4dev
         public RelayOptions RelayOptions { get; set; }
 
         public bool NoUserSettings { get; set; }
+
+        public int? ParentProcessId { get; set; }
 
     }
 }
