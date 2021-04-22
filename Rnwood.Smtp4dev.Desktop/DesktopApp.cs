@@ -47,6 +47,8 @@ namespace Rnwood.Smtp4dev.Desktop
 
             this.platform = (IPlatform)serviceProvider.GetService(typeof(IPlatform));
 
+            
+
             if (!Environment.GetCommandLineArgs().Any(a => a.StartsWith("--type=")))
             {
                 if (Debugger.IsAttached)
@@ -64,17 +66,27 @@ namespace Rnwood.Smtp4dev.Desktop
                     statusIcon.Activate += StatusIcon_Activate;
                     statusIcon.PopupMenu += OnTrayIconPopup;
 
-                    IChromelyWindow windowService = this.serviceProvider.GetService<IChromelyWindow>();
-                    windowService.NativeHost.HostSizeChanged += NativeHost_HostSizeChanged;
+                    this.windowService.NativeHost.HostSizeChanged += NativeHost_HostSizeChanged;
+                    this.windowService.NativeHost.HostClose += NativeHost_HostClose;
+                    this.windowService.NativeHost.HostCreated += NativeHost_HostCreated;
 
 
                     Application.Run();
                 });
                 gtkThread.Start();
+
             }
         }
 
+        private void NativeHost_HostClose(object sender, CloseEventArgs e)
+        {
+            
+        }
 
+        private void NativeHost_HostCreated(object sender, CreatedEventArgs e)
+        {
+            this.platform.HideWindow(this.windowService.Handle);
+        }
 
         private void StatusIcon_Activate(object sender, EventArgs e)
         {
@@ -87,22 +99,28 @@ namespace Rnwood.Smtp4dev.Desktop
 
             if (windowService.NativeHost.GetWindowState() == WindowState.Minimize)
             {
-                statusIcon.Visible = true;
                 this.platform.HideWindow(windowService.Handle);
             }
         }
 
-        static void OnTrayIconPopup(object o, EventArgs args)
+        void OnTrayIconPopup(object o, PopupMenuArgs args)
         {
             Menu popupMenu = new Menu();
+            ImageMenuItem menuItemShow = new ImageMenuItem("Show smtp4dev");
+            menuItemShow.Image = new Gtk.Image(Stock.Open, IconSize.Menu); ;
+            popupMenu.Add(menuItemShow);
+            menuItemShow.Activated += StatusIcon_Activate;
+
+
             ImageMenuItem menuItemQuit = new ImageMenuItem("Quit");
-            Gtk.Image appimg = new Gtk.Image(Stock.Quit, IconSize.Menu);
-            menuItemQuit.Image = appimg;
+            menuItemQuit.Image = new Gtk.Image(Stock.Quit, IconSize.Menu); ;
             popupMenu.Add(menuItemQuit);
             // Quit the application when quit has been clicked.
             menuItemQuit.Activated += delegate { Application.Quit(); };
+
             popupMenu.ShowAll();
-            popupMenu.Popup();
+
+            statusIcon.PresentMenu(popupMenu, (uint) args.Args[0],(uint) args.Args[1]);
         }
 
 

@@ -37,7 +37,7 @@ namespace Rnwood.Smtp4dev.Desktop
 
             Environment.SetEnvironmentVariable("SMTP4DEV_NOHELP", "true");
 
-            using (Command serverProcess = Command.Run(mainModule, new[] { $"--parentprocessid={Process.GetCurrentProcess().Id}", "--urls=http://*:0" }, o => o.DisposeOnExit(false).WorkingDirectory(workingDir)))
+            using (Command serverProcess = Command.Run(mainModule, new[] { $"--parentprocessid={Process.GetCurrentProcess().Id}", "--urls=http://127.0.0.1:0" }, o => o.DisposeOnExit(false).WorkingDirectory(workingDir)))
             {
                 try
                 {
